@@ -21,13 +21,14 @@ module Skyhook
 			begin
 				bucket_info = @storage.get_bucket(bucket_name)
 			rescue Exception => e
-				@storage.put_bucket(bucket_name) unless bucket_info
+				@storage.put_bucket(bucket_name)
+				@storage.put_bucket_versioning(bucket_name, 'Enabled')
 			end
 			
 			@bucket = @storage.directories.get(bucket_name)
 			
-			p @bucket
 			@verbose = true
+			@uploaded_total = 0.0
 		end
 		
 		def upload(directories)
@@ -35,6 +36,8 @@ module Skyhook
 				puts "Uploading directory #{d}" if @verbose
 				upload_directory d
 			end
+			uploaded_mbs = @uploaded_total / 1024000.0
+			puts "Uploaded #{uploaded_mbs.round(2)} MB"
 		end
 		
 	private
@@ -48,22 +51,25 @@ module Skyhook
 						current_directory = directory
 					end
 				else
-					md5 = OpenSSL::Digest::MD5.hexdigest(File.read(path))
-					puts "#{path} checksum is #{md5}" if @verbose
-					puts "Uploading file #{path}" if @verbose
-					key = "#{SKYHOOK_STORAGE_KEY}/#{path}"
-					existing_file = @bucket.files.get(key)
-					
-					if existing_file != nil and existing_file.etag.eql? md5 then
-						puts "Remote file not changed, not uploading"
-					else
-						cloud_file = @bucket.files.create(
- 							:key    => key,
-  							:body   => File.open(path),
-  							:public => false
-						) 
-					end
+					upload_file path
 				end
+			end
+		end
+		
+		def upload_file(path)
+			puts "Uploading file #{path}" if @verbose
+			key = "#{SKYHOOK_STORAGE_KEY}#{path}"
+			existing_file = @bucket.files.get(key)
+			if existing_file != nil and 
+				existing_file.etag.eql? OpenSSL::Digest::MD5.hexdigest(File.read(path)) then
+				puts "Remote file not changed, not uploading" if @verbose
+			else
+				cloud_file = @bucket.files.create(
+					:key    => key,
+					:body   => File.open(path),
+					:public => false
+				) 
+				@uploaded_total += File.size(path)
 			end
 		end
 		
@@ -73,5 +79,5 @@ end
 if __FILE__ == $0 then
 	config = YAML.load_file('./config.yaml')
 	uploader = Skyhook::Uploader.new(config['aws_access_key_id'], config['aws_secrey_key_id'], config['bucket_name'])
-	uploader.upload(['/Users/janne/Pictures'])
+	uploader.upload(['/Users/janne/eventmap-proto'])
 end
