@@ -1,16 +1,6 @@
 require 'optparse'
 
 module Skyhook
-	class AWStorageFactory
-		def self.create(config)
-			Fog::Storage.new({
-  				:provider                 => 'AWS',
-  				:aws_access_key_id        => config['aws_access_key_id'],
-  				:aws_secret_access_key    => config['aws_secret_key_id']
-			})
-		end
-	end
-
 	class Cli
 		def initialize()
 			@action = :nothing
@@ -21,7 +11,14 @@ module Skyhook
 	
 		def run()
 			parse_args!
-			config = YAML.load_file(@options[:config_file])
+			
+			begin
+				config = YAML.load_file(@options[:config_file])
+			rescue Errno::ENOENT => e
+				puts "Config file #{@options[:config_file]} not found."
+				return
+			end
+			
 			storage = AWStorageFactory.create(config)
 	
 			case @action
@@ -30,7 +27,7 @@ module Skyhook
 				when :backup
 					uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
 					uploader.upload(config['backup'])	
-				else
+				when :nothing
 					puts @args
 			end	
 		end
@@ -46,7 +43,7 @@ module Skyhook
 					@action = :recover
 				end
 		
-				opts.on("-b", "--backup [CONFIGFILE]", "Make backups") do |c|
+				opts.on("-b", "--backup [CONFIGFILE]", "Make backups (optionally using a specific config, config.yaml by default)") do |c|
 					@action = :backup
 					@options[:config_file] = c if c
 				end

@@ -4,19 +4,6 @@ require 'find'
 module Skyhook
 	SKYHOOK_STORAGE_KEY = 'skyhook-storage'
 
-	class HashCalculator
-		def self.calculate(filepath)
-			md5 = File.open(filepath, 'rb') do |stream|
-  				digest = Digest::MD5.new
-  				buffer = ""
-  				digest.update(buffer) while stream.read(@@BUFFER_SIZE, buffer)
-  				return digest.to_s
-			end
-		end
-	private
-		@@BUFFER_SIZE = 4096
-	end
-
 	class Uploader
 		
 		def initialize(storage, bucket_name = 'skyhook', options = {})			

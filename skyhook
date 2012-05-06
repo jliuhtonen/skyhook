@@ -3,6 +3,7 @@ def require_relative(required)
 	require File.join(File.dirname(__FILE__), required)
 end
 
+require_relative 'lib/utils.rb'
 require_relative 'lib/uploader.rb'
 require_relative 'lib/cli.rb'
 

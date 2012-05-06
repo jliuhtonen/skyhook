@@ -1,6 +1,6 @@
 # Skyhook
 
-Skyhook is a (command line, for now) utility for backing up files in Amazon's S3 cloud storage service. 
+Skyhook is a (command line, for now) utility for backing up files in Amazon's S3. 
 
 Directories that are backed up are defined along with other settings in a YAML configuration file.
 
@@ -22,11 +22,11 @@ Requirements:
 
 ## Usage
 
-	GLaDOS:skyhook janne$ ruby skyhook.rb 
+	GLaDOS:skyhook janne$ ./skyhook 
 	Usage: skyhook.rb [options]
-	-r, --recover PATH               Recover backed up file or directory
-	-b, --backup [CONFIGFILE]        Make backups
-	-v, --[no-]verbose               Verbose output
+    	-r, --recover PATH               Recover backed up file or directory
+    	-b, --backup [CONFIGFILE]        Make backups (optionally using a specific config, config.yaml by default)
+    	-v, --[no-]verbose               Verbose output
 
 ## License
 
