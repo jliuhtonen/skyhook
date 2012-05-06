@@ -1,3 +1,5 @@
+require 'optparse'
+
 module Skyhook
 	class Cli
 		def initialize()

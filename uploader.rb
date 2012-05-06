@@ -1,3 +1,5 @@
+require 'fog'
+require 'find'
 
 module Skyhook
 	SKYHOOK_STORAGE_KEY = 'skyhook-storage'
