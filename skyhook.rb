@@ -1,5 +1,6 @@
 require 'fog'
 require 'find'
+require 'optparse'
 
 module Skyhook
 	SKYHOOK_STORAGE_KEY = 'skyhook-storage'
@@ -7,11 +8,7 @@ module Skyhook
 	class Uploader
 		attr_accessor :verbose
 		
-		def initialize(access_key_id, access_key_secret, bucket_name = 'skyhook', public = false)
-			#connect to S3
-			puts access_key_id
-			puts access_key_secret
-			
+		def initialize(access_key_id, access_key_secret, bucket_name = 'skyhook', public = false)			
 			@storage = Fog::Storage.new({
   				:provider                 => 'AWS',
   				:aws_access_key_id        => access_key_id,
@@ -31,24 +28,21 @@ module Skyhook
 			@uploaded_total = 0.0
 		end
 		
-		def upload(directories)
-			directories.each do |d|
-				puts "Uploading directory #{d}" if @verbose
-				upload_directory d
+		def upload(backup_config)
+			backup_config.each do |backup|
+				puts "Uploading directory #{backup['path']}" if @verbose
+				upload_directory backup['path']
 			end
 			uploaded_mbs = @uploaded_total / 1024000.0
-			puts "Uploaded #{uploaded_mbs.round(2)} MB"
+			puts "Uploaded #{uploaded_mbs.round(2)} MB" if @verbose
 		end
 		
 	private
 		def upload_directory(directory, ignore_hidden = true)
-			current_directory = directory
 			Find.find(directory) do |path|
 				if FileTest.directory? path 
 					if File.basename(path)[0] == ?. and ignore_hidden then
 						Find.prune
-					else
-						current_directory = directory
 					end
 				else
 					upload_file path
@@ -78,6 +72,34 @@ end
 
 if __FILE__ == $0 then
 	config = YAML.load_file('./config.yaml')
-	uploader = Skyhook::Uploader.new(config['aws_access_key_id'], config['aws_secrey_key_id'], config['bucket_name'])
-	uploader.upload(['/Users/janne/eventmap-proto'])
+	
+	action = :nothing
+	
+	options = {}
+	
+	args = OptionParser.new do |opts|
+		opts.banner = "Usage: skyhook.rb [options]"
+	
+		opts.on("-r", "--recover PATH", "Recover backed up file or directory") do |r|
+			action = :recover
+		end
+		
+		opts.on("-b", "--backup [CONFIGFILE]", "Make backups") do |c|
+			action = :backup
+			options[:config_file] = c
+		end
+	end
+	
+	args.parse!
+	
+	case action
+		when :recover
+			puts "Should recover now"
+		when :backup
+			uploader = Skyhook::Uploader.new(config['aws_access_key_id'], config['aws_secrey_key_id'], config['bucket_name'])
+			uploader.upload(config['backup'])	
+		else
+			puts args
+	end	
+	
 end
