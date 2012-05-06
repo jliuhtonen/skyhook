@@ -7,18 +7,26 @@ Directories that are backed up are defined along with other settings in a YAML c
 ## Installation
 
 Requirements:
-- Ruby 1.9.x
-- Rubygems
-- Fog gem
-	gem install fog
+-	Ruby 1.9.x
+-	Rubygems
+-	Fog gem: `gem install fog`
 
 ## Sample configuration yaml file
 
-TODO
+> aws_access_key_id: (your AWS access key)
+> aws_secrey_key_id: (your AWS secret key)
+> bucket_name: (name for the bucket to back up to)
+> backup:
+> - { path: /Users/janne/important_stuff }
+> - { path: /var/log/important/ }
 
 ## Usage
 
-TODO
+> GLaDOS:skyhook janne$ ruby skyhook.rb 
+> Usage: skyhook.rb [options]
+>    -r, --recover PATH               Recover backed up file or directory
+>    -b, --backup [CONFIGFILE]        Make backups
+>    -v, --[no-]verbose               Verbose output
 
 ## License
 
