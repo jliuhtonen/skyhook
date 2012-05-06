@@ -13,20 +13,20 @@ Requirements:
 
 ## Sample configuration yaml file
 
-> aws_access_key_id: (your AWS access key)
-> aws_secrey_key_id: (your AWS secret key)
-> bucket_name: (name for the bucket to back up to)
-> backup:
-> - { path: /Users/janne/important_stuff }
-> - { path: /var/log/important/ }
+	aws_access_key_id: (your AWS access key)
+	aws_secrey_key_id: (your AWS secret key)
+	bucket_name: (name for the bucket to back up to)
+	backup:
+	 - { path: /Users/janne/important_stuff }
+	 - { path: /var/log/important/ }
 
 ## Usage
 
-> GLaDOS:skyhook janne$ ruby skyhook.rb 
-> Usage: skyhook.rb [options]
->    -r, --recover PATH               Recover backed up file or directory
->    -b, --backup [CONFIGFILE]        Make backups
->    -v, --[no-]verbose               Verbose output
+	GLaDOS:skyhook janne$ ruby skyhook.rb 
+	Usage: skyhook.rb [options]
+	-r, --recover PATH               Recover backed up file or directory
+	-b, --backup [CONFIGFILE]        Make backups
+	-v, --[no-]verbose               Verbose output
 
 ## License
 
