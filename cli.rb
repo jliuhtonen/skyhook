@@ -1,22 +1,34 @@
 require 'optparse'
 
 module Skyhook
+	class AWStorageFactory
+		def self.create(config)
+			Fog::Storage.new({
+  				:provider                 => 'AWS',
+  				:aws_access_key_id        => config['aws_access_key_id'],
+  				:aws_secret_access_key    => config['aws_secret_key_id']
+			})
+		end
+	end
+
 	class Cli
 		def initialize()
 			@action = :nothing
 			@options = {}
+			@options[:config_file] = @@DEFAULT_CONFIG
 			@args = nil
 		end
 	
 		def run()
-			config = YAML.load_file('./config.yaml')
 			parse_args!
+			config = YAML.load_file(@options[:config_file])
+			storage = AWStorageFactory.create(config)
 	
 			case @action
 				when :recover
 					puts "Should recover now"
 				when :backup
-					uploader = Skyhook::Uploader.new(config['aws_access_key_id'], config['aws_secrey_key_id'], config['bucket_name'], @options)
+					uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
 					uploader.upload(config['backup'])	
 				else
 					puts @args
@@ -24,6 +36,7 @@ module Skyhook
 		end
 		
 	private
+		@@DEFAULT_CONFIG = File.join(File.dirname(__FILE__), 'config.yaml')
 		
 		def parse_args!()
 			@args = OptionParser.new do |opts|
@@ -35,7 +48,7 @@ module Skyhook
 		
 				opts.on("-b", "--backup [CONFIGFILE]", "Make backups") do |c|
 					@action = :backup
-					@options[:config_file] = c
+					@options[:config_file] = c if c
 				end
 		
 				opts.on("-v", "--[no-]verbose", "Verbose output") do |v|

@@ -14,7 +14,7 @@ Requirements:
 ## Sample configuration yaml file
 
 	aws_access_key_id: (your AWS access key)
-	aws_secrey_key_id: (your AWS secret key)
+	aws_secret_key_id: (your AWS secret key)
 	bucket_name: (name for the bucket to back up to)
 	backup:
 	 - { path: /Users/janne/important_stuff }

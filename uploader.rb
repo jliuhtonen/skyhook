@@ -19,12 +19,9 @@ module Skyhook
 
 	class Uploader
 		
-		def initialize(access_key_id, access_key_secret, bucket_name = 'skyhook', options = {})			
-			@storage = Fog::Storage.new({
-  				:provider                 => 'AWS',
-  				:aws_access_key_id        => access_key_id,
-  				:aws_secret_access_key    => access_key_secret
-			})
+		def initialize(storage, bucket_name = 'skyhook', options = {})			
+			
+			@storage = storage
 			
 			begin
 				bucket_info = @storage.get_bucket(bucket_name)
