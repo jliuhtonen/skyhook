@@ -5,7 +5,13 @@ end
 
 require_relative 'lib/utils.rb'
 require_relative 'lib/uploader.rb'
+require_relative 'lib/downloader.rb'
 require_relative 'lib/cli.rb'
+
+#global constants
+module Skyhook
+		SKYHOOK_STORAGE_KEY = 'skyhook-storage'
+end
 
 if __FILE__ == $0 then
 	Skyhook::Cli.new.run

@@ -23,7 +23,8 @@ module Skyhook
 	
 			case @action
 				when :recover
-					puts "Should recover now"
+					downloader = Skyhook::Downloader.new(storage, config['bucket_name'])
+					downloader.download(@options[:download_files])
 				when :backup
 					uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
 					uploader.upload(config['backup'])	
@@ -39,8 +40,9 @@ module Skyhook
 			@args = OptionParser.new do |opts|
 				opts.banner = "Usage: skyhook.rb [options]"
 	
-				opts.on("-r", "--recover PATH", "Recover backed up file or directory") do |r|
+				opts.on("-r", "--recover path1,path2,path3", Array, "Recover backed up files or directories") do |r|
 					@action = :recover
+					@options[:download_files] = r
 				end
 		
 				opts.on("-b", "--backup [CONFIGFILE]", "Make backups (optionally using a specific config, config.yaml by default)") do |c|
