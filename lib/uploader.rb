@@ -48,7 +48,7 @@ module Skyhook
 		def upload_file(path)
 			puts "Processing file #{path}" if @verbose
 			key = "#{SKYHOOK_STORAGE_KEY}#{path}"
-			existing_file = @bucket.files.get(key)
+			existing_file = @bucket.files.head(key)
 			if existing_file != nil and 
 				existing_file.etag.eql? HashCalculator.calculate(path) then
 				puts "Remote file already up to date, not uploading" if @verbose
