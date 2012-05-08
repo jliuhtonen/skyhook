@@ -1,5 +1,7 @@
 module Skyhook
 	class Downloader
+        attr_accessor :overwrite_confirmation
+
 		def initialize(storage, bucket_name)
 			@storage = storage
 			begin
@@ -8,6 +10,7 @@ module Skyhook
 				raise "No such bucket #{bucket_name}"
 			end
 			@bucket = @storage.directories.get(bucket_name)
+            @overwrite = nil
 		end
 		
 		def download(paths)
@@ -29,16 +32,28 @@ module Skyhook
 	
 	private
 		def download_file(head)
-			local_file_name = head.key.gsub(SKYHOOK_STORAGE_KEY, '')
-			puts "Local file name #{local_file_name}"
-			unless File.exists? local_file_name then
-				File.open(local_file_name, 'w') do |file|
-					file.write(@bucket.files.get(head.key).body)
-				end
+			local_file_name = head.key.gsub(SKYHOOK_STORAGE_KEY, '')			
+
+            puts "Local file name #{local_file_name}"
+			if File.exists? local_file_name and not @overwrite then
+                write = @overwrite_confirmation.call("Not identical #{local_file_name} exists.")
+				case write
+                    when :all
+                        @overwrite = true
+                        get head.key 
+                    when :yes
+                        get head.key   
+                end
 			else
-				puts "Eek! It already exists"
+                get head.key
 			end
 		end
+
+        def get(key)
+            File.open(local_file_name, 'w') do |file|
+				file.write(@bucket.files.get(key).body)
+			end
+        end
 		
 		def download_directory(path)
 			puts "should download directory #{path}"

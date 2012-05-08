@@ -21,9 +21,23 @@ module Skyhook
 			
 			storage = AWStorageFactory.create(config)
 	
+            overwrite_confirmation = 
+
 			case @action
 				when :recover
 					downloader = Skyhook::Downloader.new(storage, config['bucket_name'])
+                    downloader.overwrite_confirmation = lambda do |message|
+                        puts "#{message} Overwrite [y/n/a]"
+                        STDOUT.flush
+                        case gets.chomp.to_sym
+                            when :a
+                                return :all
+                            when :y
+                                return :yes
+                            else
+                                return :no  
+                        end
+                    end
 					downloader.download(@options[:download_files])
 				when :backup
 					uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
