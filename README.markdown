@@ -1,6 +1,6 @@
 # Skyhook
 
-Skyhook is a (command line, for now) utility for backing up files in Amazon's S3. 
+Skyhook is a command line utility for backing up files in Amazon's S3. 
 
 Directories that are backed up are defined along with other settings in a YAML configuration file.
 
