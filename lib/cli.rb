@@ -20,14 +20,12 @@ module Skyhook
 			end
 			
 			storage = AWStorageFactory.create(config)
-	
-            overwrite_confirmation = 
 
 			case @action
 				when :recover
 					downloader = Skyhook::Downloader.new(storage, config['bucket_name'])
                     downloader.overwrite_confirmation = lambda do |message|
-                        puts "#{message} Overwrite [y/n/a]"
+                        puts "#{message} Overwrite [y/n/a]?"
                         STDOUT.flush
                         case gets.chomp.to_sym
                             when :a
