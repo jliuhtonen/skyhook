@@ -1,5 +1,8 @@
 require 'fog'
 require 'find'
+require 'zlib'
+require 'tempfile'
+require File.join(File.dirname(__FILE__), 'metadata.rb')
 
 module Skyhook
 
@@ -19,6 +22,7 @@ module Skyhook
 			@bucket = @storage.directories.get(bucket_name)
 			
 			@verbose = options[:verbose] == true
+			@compress = options[:compress] == true
 			@uploaded_total = 0.0
 		end
 		
@@ -48,17 +52,43 @@ module Skyhook
 			puts "Processing file #{path}" if @verbose
 			key = "#{SKYHOOK_STORAGE_KEY}#{path}"
 			existing_file = @bucket.files.head(key)
-			if existing_file != nil and 
-				existing_file.etag.eql? HashCalculator.calculate(path) then
+			checksum = HashCalculator.calculate(path)
+			
+			upload_path = path
+			existing_file_metadata = existing_file.metadata if existing_file
+			
+			remote_checksum = existing_file_metadata[Metadata::CHECKSUM] if existing_file_metadata
+			
+			if existing_file != nil and remote_checksum.eql? checksum then
 				puts "Remote file already up to date, not uploading" if @verbose
 			else
-				cloud_file = @bucket.files.create(
-					:key    => key,
-					:body   => File.open(path),
-					:public => false
-				) 
-				@uploaded_total += File.size(path)
+					if @compress then
+						tmpfile = Tempfile.new('skyhook')
+						deflator = Zlib::Deflate.new()
+						tmpfile << deflator.deflate(File.read(path))
+						deflator.close
+						tmpfile.flush
+						tmpfile.close
+						upload_path = tmpfile.path
+						puts tmpfile.path
+					end
+					puts "Uploading from #{upload_path}"
+					cloud_file = @bucket.files.create(
+						:key    => key,
+						:body   => File.open(upload_path),
+						:public => false,
+						:metadata => {
+							Metadata::CHECKSUM => checksum,
+							Metadata::COMPRESSED => @compress
+						}
+					) 
+					@uploaded_total += File.size(upload_path)
 			end
+		end
+		
+		def compress_file(file)
+			
+			return tmpfile
 		end
 		
 	end

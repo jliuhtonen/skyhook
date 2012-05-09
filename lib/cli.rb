@@ -20,28 +20,33 @@ module Skyhook
 			end
 			
 			storage = AWStorageFactory.create(config)
+			@options[:compress] = config['compress']
 
-			case @action
-				when :recover
-					downloader = Skyhook::Downloader.new(storage, config['bucket_name'])
-                    downloader.overwrite_confirmation = lambda do |message|
-                        puts "#{message} Overwrite [y/n/a]?"
-                        STDOUT.flush
-                        case gets.chomp.to_sym
-                            when :a
-                                return :all
-                            when :y
-                                return :yes
-                            else
-                                return :no  
-                        end
-                    end
-					downloader.download(@options[:download_files])
-				when :backup
-					uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
-					uploader.upload(config['backup'])	
-				when :nothing
-					puts @args
+			begin
+				case @action
+					when :recover
+						downloader = Skyhook::Downloader.new(storage, config['bucket_name'])
+                    	downloader.overwrite_confirmation = lambda do |message|
+                        	puts "#{message} Overwrite [y/n/a]?"
+                        	STDOUT.flush
+                        	case gets.chomp.to_sym
+                            	when :a
+                                	return :all
+                            	when :y
+                                	return :yes
+                            	else
+                                	return :no  
+                        	end
+                    	end
+						downloader.download(@options[:download_files])
+					when :backup
+						uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
+						uploader.upload(config['backup'])	
+					when :nothing
+						puts @args
+				end
+			rescue Excon::Errors::SocketError => e
+				puts "Error connecting to AWS"
 			end	
 		end
 		
