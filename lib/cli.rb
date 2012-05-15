@@ -51,7 +51,7 @@ module Skyhook
 		end
 		
 	private
-		@@DEFAULT_CONFIG = File.join(File.dirname(__FILE__), '../config.yaml')
+		@@DEFAULT_CONFIG = File.join(File.dirname(__FILE__), '../config.yml')
 		
 		def parse_args!()
 			@args = OptionParser.new do |opts|

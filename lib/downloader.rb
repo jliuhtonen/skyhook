@@ -36,9 +36,11 @@ module Skyhook
 
 			write = true
 
+			remote_head = @bucket.files.head(remote_file.key)
+
             puts "Local file name #{local_file_name}"
 			if File.exists? local_file_name then
-				if remote_file.etag.eql? HashCalculator.calculate(local_file_name)
+				if remote_head.metadata[Metadata::CHECKSUM].eql? HashCalculator.calculate(local_file_name)
 					write = false
 					puts "Local file already up to date, skipping..."
 				else
@@ -48,27 +50,40 @@ module Skyhook
                 end 
 			end
 			
-			get(remote_file, local_file_name) if write
+			get(remote_file, local_file_name, remote_head) if write
 			
 		end
 
-        def get(remote_file, file_name)
+        def get(remote_file, file_name, head)
         
         	dir = File.dirname(file_name)
         	unless Dir.exists? dir then
         		FileUtils.mkdir_p dir
         	end
-        
+        	
             File.open(file_name, 'w') do |file|
-            	if remote_file.respond_to? :body then
-    				puts "responds"
+            	if head.metadata[Metadata::COMPRESSED] then
+            		download_and_decompress(remote_file, file_name)
+            	else
 					file.write(@bucket.files.get(remote_file.key).body)
-				else
-					puts "does not"
-					file.write(remote_file.body)
-				end 
+				end
 			end
 			puts "Wrote to #{file_name}"
+        end
+        
+        def download_and_decompress(remote_file, file_name)
+        	begin
+        		tmpfile = Tempfile.new('skyhook')
+        		tmpfile.write(@bucket.files.get(remote_file.key).body)
+        		tmpfile.close
+        		File.open(file_name, 'w') do |file|
+        			Zlib::GzipReader.open(tmpfile.path) do |gz|
+ 				    	file.write gz.read
+					end
+        		end
+        	ensure
+        		tmpfile.unlink if tmpfile
+        	end
         end
 		
 		def download_directory(path)

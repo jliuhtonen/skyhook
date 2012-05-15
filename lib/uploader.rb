@@ -62,15 +62,10 @@ module Skyhook
 			if existing_file != nil and remote_checksum.eql? checksum then
 				puts "Remote file already up to date, not uploading" if @verbose
 			else
+				begin
 					if @compress then
-						tmpfile = Tempfile.new('skyhook')
-						deflator = Zlib::Deflate.new()
-						tmpfile << deflator.deflate(File.read(path))
-						deflator.close
-						tmpfile.flush
-						tmpfile.close
+						tmpfile = compress_file path
 						upload_path = tmpfile.path
-						puts tmpfile.path
 					end
 					puts "Uploading from #{upload_path}"
 					cloud_file = @bucket.files.create(
@@ -83,12 +78,23 @@ module Skyhook
 						}
 					) 
 					@uploaded_total += File.size(upload_path)
+				ensure
+					tmpfile.unlink if tmpfile
+				end
 			end
 		end
 		
-		def compress_file(file)
-			
-			return tmpfile
+		def compress_file(path)
+			begin
+				tmpfile = Tempfile.new('skyhook')
+				gz = Zlib::GzipWriter.open(tmpfile)
+  				gz.write File.read(path)
+  			ensure
+  				gz.close
+				tmpfile.flush
+				tmpfile.close
+			end
+			tmpfile
 		end
 		
 	end
