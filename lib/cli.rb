@@ -41,7 +41,11 @@ module Skyhook
 						downloader.download(@options[:download_files])
 					when :backup
 						uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
-						uploader.upload(config['backup'])	
+						#begin
+							uploader.upload(config['backup'])
+					#	rescue Exception => e
+					#		puts e.message
+					#	end	
 					when :nothing
 						puts @args
 				end

@@ -29,22 +29,30 @@ module Skyhook
 		def upload(backup_config)
 			backup_config.each do |backup|
 				puts "Uploading directory #{backup['path']}" if @verbose
-				upload_directory backup['path']
+				upload_directory(backup['path'], backup['excludes'])
 			end
 			uploaded_mbs = @uploaded_total / 1024000.0
 			puts "Uploaded #{uploaded_mbs.round(2)} MB"
 		end
 		
 	private
-		def upload_directory(directory, ignore_hidden = true)
-			Find.find(directory) do |path|
-				if FileTest.directory? path 
-					if File.basename(path)[0] == ?. and ignore_hidden then
-						Find.prune
+		def upload_directory(directory, excludes, ignore_hidden = true)
+			begin
+				Find.find(directory) do |path|
+					excludes.each do |exclude|
+							Find.prune if (FileTest.directory? path and path =~ /#{exclude}/) or File.basename(path) =~ /#{exclude}/
+					end if excludes
+			
+					if FileTest.directory? path 
+						if File.basename(path)[0] == ?. and ignore_hidden then
+							Find.prune
+						end
+					else
+						upload_file path
 					end
-				else
-					upload_file path
 				end
+			rescue Errno::ENOENT => e
+				raise ArgumentError, 'No such file or directory ' + directory
 			end
 		end
 		
