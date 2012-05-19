@@ -16,16 +16,23 @@ Requirements:
 	aws_access_key_id: (your AWS access key)
 	aws_secret_key_id: (your AWS secret key)
 	bucket_name: (name for the bucket to back up to)
+	compress: true		#compress backups with gzip? (true/false)
 	backup:
-	 - { path: /Users/janne/important_stuff }
-	 - { path: /var/log/important/ }
+      -
+         path: /Users/janne/git
+      - 
+         path: /Users/janne/important
+         excludes: 
+           - '^foo(.*)' 							#file names starting with "foo"
+           - '(.+)\.o$'								#file names ending with ".o"
+           - '/Users/janne/important/not-important' #a directory
 
 ## Usage
 
 	GLaDOS:skyhook janne$ ./skyhook 
 	Usage: skyhook.rb [options]
     	-r, --recover PATH               Recover backed up file or directory
-    	-b, --backup [CONFIGFILE]        Make backups (optionally using a specific config, config.yaml by default)
+    	-b, --backup [CONFIGFILE]        Make backups (optionally using a specific config, config.yml by default)
     	-v, --[no-]verbose               Verbose output
 
 ## License

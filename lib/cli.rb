@@ -66,7 +66,7 @@ module Skyhook
 					@options[:download_files] = r
 				end
 		
-				opts.on("-b", "--backup [CONFIGFILE]", "Make backups (optionally using a specific config, config.yaml by default)") do |c|
+				opts.on("-b", "--backup [CONFIGFILE]", "Make backups (optionally using a specific config, config.yml by default)") do |c|
 					@action = :backup
 					@options[:config_file] = c if c
 				end
