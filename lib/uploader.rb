@@ -23,6 +23,7 @@ module Skyhook
 			
 			@verbose = options[:verbose] == true
 			@compress = options[:compress] == true
+			@multipart_chunk_size = options[:multipart_chunk_size]
 			@uploaded_total = 0.0
 		end
 		
@@ -80,6 +81,7 @@ module Skyhook
 						:key    => key,
 						:body   => File.open(upload_path),
 						:public => false,
+						:multipart_chunk_size => @multipart_chunk_size,
 						:metadata => {
 							Metadata::CHECKSUM => checksum,
 							Metadata::COMPRESSED => @compress

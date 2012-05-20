@@ -15,6 +15,8 @@ module Skyhook
 		
 		def download(paths)
 			paths.each do |path|
+				#expand the possibly relative path to a absolute path
+				path = File.absolute_path path
 				#what is this path thing anyways...
 				#hmm.. maybe its a file? 
 				key = "#{SKYHOOK_STORAGE_KEY}#{path}"

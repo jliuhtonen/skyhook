@@ -21,6 +21,7 @@ module Skyhook
 			
 			storage = AWStorageFactory.create(config)
 			@options[:compress] = config['compress']
+			@options[:multipart_chunk_size] = config['multipart_chunk_size']
 
 			begin
 				case @action
