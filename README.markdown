@@ -17,6 +17,7 @@ Requirements:
 	aws_secret_key_id: (your AWS secret key)
 	bucket_name: (name for the bucket to back up to)
 	region: (AWS region, e.g. us-east-1)
+	multipart_chunk_size: 5242880 #Upload chunk size for large files, 5MB
 	compress: true		#compress backups with gzip? (true/false)
 	backup:
       -
