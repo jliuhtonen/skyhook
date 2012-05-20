@@ -17,7 +17,8 @@ module Skyhook
 			Fog::Storage.new({
   				:provider                 => 'AWS',
   				:aws_access_key_id        => config['aws_access_key_id'],
-  				:aws_secret_access_key    => config['aws_secret_key_id']
+  				:aws_secret_access_key    => config['aws_secret_key_id'],
+  				:region					  => config['region']
 			})
 		end
 	end

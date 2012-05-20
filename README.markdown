@@ -16,6 +16,7 @@ Requirements:
 	aws_access_key_id: (your AWS access key)
 	aws_secret_key_id: (your AWS secret key)
 	bucket_name: (name for the bucket to back up to)
+	region: (AWS region, e.g. us-east-1)
 	compress: true		#compress backups with gzip? (true/false)
 	backup:
       -
