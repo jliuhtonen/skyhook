@@ -39,7 +39,7 @@ If no specific configuration is defined, skyhook tries to read its configuration
     	-v, --[no-]verbose               Verbose output
 
 ## Logging
-Skyhook writes its log to ~/logs/skyhook.log and rotates the logfile each day you run backups.
+Skyhook writes its log to ~/.skyhook/logs/skyhook.log and rotates the logfile each day you run backups.
 
 ## License
 
