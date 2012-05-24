@@ -1,19 +1,45 @@
 require 'optparse'
+require 'logger'
 
 module Skyhook
 	class Cli
 		def initialize()
 			@action = :nothing
 			@options = {}
-			@options[:config_file] = @@DEFAULT_CONFIG
+			user_conf_path = File.join(@@SKYHOOK_USER_HOME, 'config.yml')
+			if File.exists? user_conf_path then
+				@options[:config_file] = user_conf_path
+			else 
+				@options[:config_file] = @@DEFAULT_CONFIG
+			end
 			@args = nil
+			logs_path = File.join(@@SKYHOOK_USER_HOME, 'logs')
+			FileUtils::mkdir_p logs_path
+			@log = Logger.new(File.join(logs_path, 'skyhook.log'), 'daily')
 		end
 	
 		def run()
 			parse_args!
 			
+		    logger = lambda do |level, msg|
+				puts "#{level}: #{msg}" if @options[:verbose]
+				case level
+					when :fatal
+						@log.fatal msg
+					when :warn
+						@log.warn msg
+					when :error
+						@log.error msg
+					when :info
+						@log.info msg
+					else
+						@log.debug msg
+				end
+			end
+			
 			begin
 				config = YAML.load_file(@options[:config_file])
+				logger.call(:info, "Loaded config from #{@options[:config_file]}")
 			rescue Errno::ENOENT => e
 				puts "Config file #{@options[:config_file]} not found."
 				return
@@ -41,7 +67,7 @@ module Skyhook
                     	end
 						downloader.download(@options[:download_files])
 					when :backup
-						uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options)
+						uploader = Skyhook::Uploader.new(storage, config['bucket_name'], @options, logger)
 						#begin
 							uploader.upload(config['backup'])
 					#	rescue Exception => e
@@ -57,6 +83,7 @@ module Skyhook
 		
 	private
 		@@DEFAULT_CONFIG = File.join(File.dirname(__FILE__), '../config.yml')
+		@@SKYHOOK_USER_HOME = File.expand_path '~/.skyhook/'
 		
 		def parse_args!()
 			@args = OptionParser.new do |opts|

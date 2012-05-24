@@ -8,7 +8,7 @@ module Skyhook
 
 	class Uploader
 		
-		def initialize(storage, bucket_name = 'skyhook', options = {})			
+		def initialize(storage, bucket_name = 'skyhook', options = {}, logger)			
 			
 			@storage = storage
 			
@@ -21,19 +21,19 @@ module Skyhook
 			
 			@bucket = @storage.directories.get(bucket_name)
 			
-			@verbose = options[:verbose] == true
 			@compress = options[:compress] == true
 			@multipart_chunk_size = options[:multipart_chunk_size]
 			@uploaded_total = 0.0
+			@logger = logger
 		end
 		
 		def upload(backup_config)
 			backup_config.each do |backup|
-				puts "Uploading directory #{backup['path']}" if @verbose
+				@logger.call(:info, "Uploading directory #{backup['path']}")
 				upload_directory(backup['path'], backup['excludes'])
 			end
 			uploaded_mbs = @uploaded_total / 1024000.0
-			puts "Uploaded #{uploaded_mbs.round(2)} MB"
+			@logger.call(:info, "Uploaded #{uploaded_mbs.round(2)} MB")
 		end
 		
 	private
@@ -58,7 +58,7 @@ module Skyhook
 		end
 		
 		def upload_file(path)
-			puts "Processing file #{path}" if @verbose
+			@logger.call(:info, "Processing file #{path}")
 			key = "#{SKYHOOK_STORAGE_KEY}#{path}"
 			existing_file = @bucket.files.head(key)
 			checksum = HashCalculator.calculate(path)
@@ -69,14 +69,14 @@ module Skyhook
 			remote_checksum = existing_file_metadata[Metadata::CHECKSUM] if existing_file_metadata
 			
 			if existing_file != nil and remote_checksum.eql? checksum then
-				puts "Remote file already up to date, not uploading" if @verbose
+				@logger.call(:info, "Remote file already up to date, not uploading")
 			else
 				begin
 					if @compress then
 						tmpfile = compress_file path
 						upload_path = tmpfile.path
 					end
-					puts "Uploading from #{upload_path}"
+					@logger.call(:info, "Uploading from #{upload_path}")
 					cloud_file = @bucket.files.create(
 						:key    => key,
 						:body   => File.open(upload_path),
