@@ -11,7 +11,8 @@ Requirements:
 -	Rubygems
 -	Fog gem: `gem install fog`
 
-## Sample configuration yaml file
+## Sample configuration yml file
+If no specific configuration is defined, skyhook tries to read its configuration from config.yml in ~/.skyhook and finally the same directory where skyhook resides.
 
 	aws_access_key_id: (your AWS access key)
 	aws_secret_key_id: (your AWS secret key)
@@ -36,6 +37,9 @@ Requirements:
     	-r, --recover PATH               Recover backed up file or directory
     	-b, --backup [CONFIGFILE]        Make backups (optionally using a specific config, config.yml by default)
     	-v, --[no-]verbose               Verbose output
+
+## Logging
+Skyhook writes its log to ~/logs/skyhook.log and rotates the logfile each day you run backups.
 
 ## License
 
